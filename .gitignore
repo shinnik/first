@@ -1,5 +1,6 @@
 venv/
 node_modules/
+*/instance/config.py
 *.pyc
 *.swo
 *.swp
