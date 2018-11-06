@@ -5,4 +5,4 @@ from .instance.config import TestConfig, ProductConfig
 app = Flask(__name__)
 app.config.from_object(TestConfig)
 
-from .views import *
+from .handlers import *
