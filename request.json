@@ -1,0 +1,3 @@
+
+{"jsonrpc": "2.0", "method": "list_chats", "params": {"user_id": "3"}, "id": "1"}
+
