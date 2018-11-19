@@ -9,3 +9,4 @@ jsonrpc = JSONRPC(app, "/api")
 
 
 from .handlers import *
+from .oauth import *
