@@ -1,6 +1,8 @@
-from flask import Flask, redirect, url_for, session, request, jsonify, json
+from flask import Flask, redirect, url_for, session, request, jsonify, json, abort
 from authlib.flask.client import OAuth
+import requests
 
+from app import model
 from .instance.auth_config import VK_CREDENTIALS as config
 from app import app
 
@@ -16,7 +18,7 @@ vkontakte = oauth.register(
     api_base_url='https://api.vk.com/method/',
     access_token_url=' https://oauth.vk.com/access_token',
     authorize_url='https://oauth.vk.com/authorize',
-    client_kwargs={'scope': 'user_id email', 'response_type': 'token', 'v': 5.87, \
+    client_kwargs={'scope': 'user_id email', 'response_type': 'code', 'v': 5.92, \
                    'display': 'page'},
 )
 
@@ -24,22 +26,28 @@ vkontakte = oauth.register(
 @app.route('/login')
 def login():
     redirect_uri = url_for('authorize', _external=True)
-    print(redirect_uri)
-    #redirect_uri = 'https://oauth.vk.com/blank.html'
-    resp = oauth.vk.authorize_redirect(redirect_uri)
-    print(json.dumps(resp.data))
     return oauth.vk.authorize_redirect(redirect_uri)
+
 
 
 @app.route('/authorize')
 def authorize():
-    # this is a pseudo method, you need to implement it yourself
-    print(token)
-    return redirect(url_for('profile'))
+    redirect_uri = url_for('authorize', _external=True)
+    code = request.args.get('code')
+    cid = config['consumer_id']
+    csecret = config['consumer_secret']
+    resp = requests.get(
+        f'https://oauth.vk.com/access_token?client_id={cid}&client_secret={csecret}&redirect_uri={redirect_uri}&code={code}')
+    json_ = json.loads(resp.content)
+    session['access_token'] = json_['access_token']
+    session['user'] = json_['user_id']
+    new_user = model.create_user(str(json_['user_id']))
+    return jsonify(new_user)
 
 
-@app.route('/profile')
-def twitter_profile():
-    resp = oauth.vk.get('account/verify_credentials.json')
-    profile = resp.json()
-    print(profile)
+@app.route('/')
+def root():
+   return "main page"
+
+
+

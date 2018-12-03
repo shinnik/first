@@ -1,5 +1,5 @@
 from app import db
-import json
+from flask import jsonify
 import datetime
 
 
@@ -133,3 +133,16 @@ def read(user_id, message_id):
     return db.query_one("""
     SELECT * FROM chats
     WHERE chat_id=%(chat_id)s""", chat_id=chat_id)
+
+
+def create_user(vk_user_id):
+    # check if user is in the database or not
+    try:
+        return db.query_one("""
+        SELECT * FROM users
+        WHERE vk_id=%(vk_user_id)s""", vk_user_id=vk_user_id)
+    except TypeError:
+        return db.execute_and_return_new("""
+                INSERT INTO users (nick, name, vk_id) 
+                VALUES ('new_nick', 'new_name', 'vk_user_id')
+                RETURNING user_id""")
