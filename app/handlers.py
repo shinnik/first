@@ -1,8 +1,10 @@
-from flask import Flask, redirect, url_for, request, jsonify, json, abort, render_template
+from flask import Flask, redirect, url_for, request, jsonify, json, abort, render_template, make_response, Response
 from app import jsonrpc
 from app import model
 from app import app
 from .utils import is_authorized
+from .utils import crossdomain
+from base64 import b64encode
 
 
 from authlib.flask.client import OAuth
@@ -27,6 +29,18 @@ vkontakte = oauth.register(
     client_kwargs={'scope': 'user_id email', 'response_type': 'code', 'v': 5.92, \
                    'display': 'page'},
 )
+
+
+@app.route('/check_auth', methods=["POST", "OPTIONS"])
+@crossdomain(origin='*')
+def check_auth():
+    data = json.loads(request.get_data())
+    if data['email'] == 'admin@mail.ru' and data['password'] == 'admin01':
+        sum_ = (data['email'] + '&' + data['password']).encode('utf-8')
+        stub = {"token": b64encode(sum_)}
+        return jsonify(stub)
+    else:
+        return abort(401)
 
 
 @app.route('/login')
@@ -95,6 +109,16 @@ def read(message_id):
 
 
 @is_authorized(session['user_id'])
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST', 'OPTIONS'])
+@crossdomain(origin='*')
 def index():
-    return render_template('root.html')
+    if request.method == 'POST' or request.method == 'OPTIONS':
+        data = json.loads(request.get_data())
+        print(data)
+        if data['method'] == "list_chats":
+            chats = model.list_chats(data['params']['user_id'])
+            return jsonify(chats)
+        return abort(500)
+
+    else:
+        return render_template('root.html')
