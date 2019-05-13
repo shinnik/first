@@ -4,9 +4,18 @@
     <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="ignoredPackages">
         <value>
-          <list size="2">
+          <list size="11">
             <item index="0" class="java.lang.String" itemvalue="ItsDangerous" />
             <item index="1" class="java.lang.String" itemvalue="MarkupSafe" />
+            <item index="2" class="java.lang.String" itemvalue="functools32" />
+            <item index="3" class="java.lang.String" itemvalue="ttystatus" />
+            <item index="4" class="java.lang.String" itemvalue="pygame" />
+            <item index="5" class="java.lang.String" itemvalue="python-libtorrent" />
+            <item index="6" class="java.lang.String" itemvalue="unity-lens-photos" />
+            <item index="7" class="java.lang.String" itemvalue="pycairo" />
+            <item index="8" class="java.lang.String" itemvalue="futures" />
+            <item index="9" class="java.lang.String" itemvalue="pygobject" />
+            <item index="10" class="java.lang.String" itemvalue="PAM" />
           </list>
         </value>
       </option>

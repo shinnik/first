@@ -1,0 +1,7 @@
+#!/home/nikita/Desktop/Projects/TTBackend/2018-Backend-FS-11-Izrailev/env/bin/python
+
+import warnings
+warnings.simplefilter('default', DeprecationWarning)
+
+from logilab.common.pytest import run
+run()

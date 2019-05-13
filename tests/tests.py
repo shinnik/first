@@ -1,5 +1,6 @@
-from urllib import request
+# from urllib import request
 from flask import jsonify
+import requests
 import unittest
 from jsondiff import diff
 import sys
@@ -24,8 +25,10 @@ from app import app
 
 def api_post(api_name, datatype):
 
-    data = b'this_is_post_request'
-    req = request.urlopen(f'http://127.0.0.1:5050/api/{api_name}/', data)
+    # data = b'this_is_post_request'
+    req = requests.post('http://127.0.0.1:5050/api/', data)
+    headers = {'Content-Type': 'application/json'}
+    data = '{"jsonrpc": "2.0", "method": "list_messages", "params": "{""}"}'
 
     if datatype == 'code':
         return req.getcode()
@@ -35,29 +38,6 @@ def api_post(api_name, datatype):
         with req as resp:
             result_json = resp.read().decode('utf-8')
             return result_json
-
-
-def api_get(api_name, get_params, datatype):
-
-    data = None
-    req = request.urlopen(f'http://127.0.0.1:5050/api/{api_name}/?{get_params}', data)
-
-    if datatype == 'code':
-        return req.getcode()
-    if datatype == 'mime-type':
-        return req.info()['Content-Type']
-    if datatype == 'data':
-        with req as resp:
-            result_json = resp.read().decode('utf-8')
-            return result_json
-
-
-def are_jsons_same(json1, json2):
-    result = diff(json1, json2)
-    if result == {}:
-        return True
-    else:
-        return False
 
 
 class TestStubs(unittest.TestCase):

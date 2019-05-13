@@ -1,0 +1,564 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 10.6 (Ubuntu 10.6-0ubuntu0.18.04.1)
+-- Dumped by pg_dump version 10.6 (Ubuntu 10.6-0ubuntu0.18.04.1)
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
+--
+
+CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+
+
+--
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
+
+
+SET default_tablespace = '';
+
+SET default_with_oids = false;
+
+--
+-- Name: attachments; Type: TABLE; Schema: public; Owner: quack
+--
+
+CREATE TABLE public.attachments (
+    attach_id integer NOT NULL,
+    chat_id integer NOT NULL,
+    user_id integer NOT NULL,
+    message_id integer NOT NULL,
+    type text NOT NULL,
+    url text NOT NULL
+);
+
+
+ALTER TABLE public.attachments OWNER TO quack;
+
+--
+-- Name: attachments_attach_id_seq; Type: SEQUENCE; Schema: public; Owner: quack
+--
+
+CREATE SEQUENCE public.attachments_attach_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.attachments_attach_id_seq OWNER TO quack;
+
+--
+-- Name: attachments_attach_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: quack
+--
+
+ALTER SEQUENCE public.attachments_attach_id_seq OWNED BY public.attachments.attach_id;
+
+
+--
+-- Name: chats; Type: TABLE; Schema: public; Owner: quack
+--
+
+CREATE TABLE public.chats (
+    chat_id integer NOT NULL,
+    is_group_chat boolean NOT NULL,
+    topic text NOT NULL,
+    last_message text NOT NULL,
+    new_messages integer,
+    last_read_message_id integer,
+    CONSTRAINT chats_last_message_check CHECK ((length(last_message) < 65536)),
+    CONSTRAINT chats_topic_check CHECK ((length(topic) < 100))
+);
+
+
+ALTER TABLE public.chats OWNER TO quack;
+
+--
+-- Name: chats_chat_id_seq; Type: SEQUENCE; Schema: public; Owner: quack
+--
+
+CREATE SEQUENCE public.chats_chat_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.chats_chat_id_seq OWNER TO quack;
+
+--
+-- Name: chats_chat_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: quack
+--
+
+ALTER SEQUENCE public.chats_chat_id_seq OWNED BY public.chats.chat_id;
+
+
+--
+-- Name: members; Type: TABLE; Schema: public; Owner: quack
+--
+
+CREATE TABLE public.members (
+    user_id integer NOT NULL,
+    chat_id integer NOT NULL,
+    new_messages integer NOT NULL,
+    last_read_message_id integer NOT NULL
+);
+
+
+ALTER TABLE public.members OWNER TO quack;
+
+--
+-- Name: messages; Type: TABLE; Schema: public; Owner: quack
+--
+
+CREATE TABLE public.messages (
+    message_id integer NOT NULL,
+    user_id integer NOT NULL,
+    content text NOT NULL,
+    added_at timestamp without time zone DEFAULT now() NOT NULL,
+    chat_id integer,
+    CONSTRAINT messages_content_check CHECK ((length(content) < 65536))
+);
+
+
+ALTER TABLE public.messages OWNER TO quack;
+
+--
+-- Name: messages_message_id_seq; Type: SEQUENCE; Schema: public; Owner: quack
+--
+
+CREATE SEQUENCE public.messages_message_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.messages_message_id_seq OWNER TO quack;
+
+--
+-- Name: messages_message_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: quack
+--
+
+ALTER SEQUENCE public.messages_message_id_seq OWNED BY public.messages.message_id;
+
+
+--
+-- Name: users; Type: TABLE; Schema: public; Owner: quack
+--
+
+CREATE TABLE public.users (
+    user_id integer NOT NULL,
+    nick text NOT NULL,
+    name text NOT NULL,
+    avatar text,
+    vk_id text,
+    CONSTRAINT users_name_check CHECK ((length(name) < 32)),
+    CONSTRAINT users_nick_check CHECK ((length(nick) < 32))
+);
+
+
+ALTER TABLE public.users OWNER TO quack;
+
+--
+-- Name: users_user_id_seq; Type: SEQUENCE; Schema: public; Owner: quack
+--
+
+CREATE SEQUENCE public.users_user_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.users_user_id_seq OWNER TO quack;
+
+--
+-- Name: users_user_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: quack
+--
+
+ALTER SEQUENCE public.users_user_id_seq OWNED BY public.users.user_id;
+
+
+--
+-- Name: attachments attach_id; Type: DEFAULT; Schema: public; Owner: quack
+--
+
+ALTER TABLE ONLY public.attachments ALTER COLUMN attach_id SET DEFAULT nextval('public.attachments_attach_id_seq'::regclass);
+
+
+--
+-- Name: chats chat_id; Type: DEFAULT; Schema: public; Owner: quack
+--
+
+ALTER TABLE ONLY public.chats ALTER COLUMN chat_id SET DEFAULT nextval('public.chats_chat_id_seq'::regclass);
+
+
+--
+-- Name: messages message_id; Type: DEFAULT; Schema: public; Owner: quack
+--
+
+ALTER TABLE ONLY public.messages ALTER COLUMN message_id SET DEFAULT nextval('public.messages_message_id_seq'::regclass);
+
+
+--
+-- Name: users user_id; Type: DEFAULT; Schema: public; Owner: quack
+--
+
+ALTER TABLE ONLY public.users ALTER COLUMN user_id SET DEFAULT nextval('public.users_user_id_seq'::regclass);
+
+
+--
+-- Data for Name: attachments; Type: TABLE DATA; Schema: public; Owner: quack
+--
+
+COPY public.attachments (attach_id, chat_id, user_id, message_id, type, url) FROM stdin;
+\.
+
+
+--
+-- Data for Name: chats; Type: TABLE DATA; Schema: public; Owner: quack
+--
+
+COPY public.chats (chat_id, is_group_chat, topic, last_message, new_messages, last_read_message_id) FROM stdin;
+1	f			\N	\N
+6	f			\N	\N
+7	f			\N	\N
+8	f			\N	\N
+9	f			\N	\N
+10	f		hello	\N	28
+0	f	Piter	Want_to_be_there	0	0
+13	f	topic 0	last_message0	0	7
+14	f	topic 1	last_message1	1	9
+15	f	topic 2	last_message2	2	20
+16	f	topic 3	last_message3	3	14
+17	f	topic 4	last_message4	4	12
+18	f	topic 5	last_message5	5	16
+19	f	topic 6	last_message6	6	9
+20	f	topic 7	last_message7	7	25
+21	f	topic 8	last_message8	8	17
+22	f	topic 9	last_message9	9	25
+\.
+
+
+--
+-- Data for Name: members; Type: TABLE DATA; Schema: public; Owner: quack
+--
+
+COPY public.members (user_id, chat_id, new_messages, last_read_message_id) FROM stdin;
+2	0	1	0
+2	1	0	0
+2	6	0	0
+2	7	0	0
+2	8	0	0
+2	9	0	0
+2	10	-1	18
+4	10	12	28
+2	13	0	10
+5	13	0	11
+2	14	0	12
+7	14	0	13
+5	15	0	14
+7	15	0	15
+8	16	0	16
+7	16	0	17
+8	17	0	18
+4	17	0	19
+\.
+
+
+--
+-- Data for Name: messages; Type: TABLE DATA; Schema: public; Owner: quack
+--
+
+COPY public.messages (message_id, user_id, content, added_at, chat_id) FROM stdin;
+0	2	Want_to_be_there	2018-10-31 03:55:29.758745	0
+5	2	Hi, Dad!	2018-11-12 02:06:29.914265	10
+6	2	Hi, Dad!	2018-11-12 02:06:44.599402	10
+7	2	Hi, Dad!	2018-11-12 02:07:33.585384	10
+8	2	Hi, Dad!	2018-11-12 02:07:44.862268	10
+9	2	Hi, Dad!	2018-11-12 02:09:07.616327	10
+10	2	Hi, Dad!	2018-11-12 02:09:36.849298	10
+11	2	Hi!	2018-11-12 03:26:04.167489	10
+12	2	Hi!	2018-11-12 03:27:50.357874	10
+13	2	Hi!	2018-11-12 03:30:06.432495	10
+14	2	Hi!	2018-11-12 03:31:21.865735	10
+15	2	Hi!	2018-11-12 03:31:44.876597	10
+16	2	Hi!	2018-11-12 03:32:27.083166	10
+17	2	Hi!	2018-11-12 03:34:39.785431	10
+18	2	Hi!	2018-11-12 03:36:37.540752	10
+19	2	Hi!	2018-11-12 04:24:50.517455	10
+20	2	Hi!	2018-11-12 04:26:46.491789	10
+21	2	Hi!	2018-11-12 04:27:53.363215	10
+22	2	Hii!	2018-11-12 04:28:01.443563	10
+23	2	Hii!	2018-11-12 04:30:06.023934	10
+24	2	Hii!	2018-11-12 04:30:11.965711	10
+25	2	hello	2018-11-12 20:28:14.607703	10
+26	2	hello	2018-11-12 20:30:07.778451	10
+27	2	hello	2018-11-12 20:30:40.034448	10
+28	2	hello	2018-11-12 20:31:25.943984	10
+29	2	hello	2018-11-12 20:32:21.898908	10
+30	2	hello	2018-11-12 20:32:39.209696	10
+31	2	hello	2018-11-12 20:32:46.045601	10
+32	2	hello	2018-11-12 20:33:29.889982	10
+33	2	hello	2018-11-12 20:38:16.243789	10
+34	2	hello	2018-11-12 20:58:11.573735	10
+35	2	message 0	2019-02-25 14:53:09.052251	13
+36	2	message 1	2019-02-25 14:53:09.057955	13
+37	2	message 2	2019-02-25 14:53:09.058733	13
+38	2	message 3	2019-02-25 14:53:09.059317	13
+39	2	message 4	2019-02-25 14:53:09.060245	13
+40	2	message 5	2019-02-25 14:53:09.061341	13
+41	2	message 6	2019-02-25 14:53:09.061915	13
+42	2	message 7	2019-02-25 14:53:09.062412	13
+43	2	message 8	2019-02-25 14:53:09.062829	13
+44	2	message 9	2019-02-25 14:53:09.063247	13
+45	7	message 0	2019-02-25 14:54:06.080407	14
+46	7	message 1	2019-02-25 14:54:06.084024	14
+47	7	message 2	2019-02-25 14:54:06.084662	14
+48	7	message 3	2019-02-25 14:54:06.085222	14
+49	7	message 4	2019-02-25 14:54:06.085755	14
+50	7	message 5	2019-02-25 14:54:06.086834	14
+51	7	message 6	2019-02-25 14:54:06.087761	14
+52	7	message 7	2019-02-25 14:54:06.088245	14
+53	7	message 8	2019-02-25 14:54:06.088666	14
+54	7	message 9	2019-02-25 14:54:06.089043	14
+55	7	message 0	2019-02-25 14:54:21.071193	15
+56	7	message 1	2019-02-25 14:54:21.074477	15
+57	7	message 2	2019-02-25 14:54:21.075403	15
+58	7	message 3	2019-02-25 14:54:21.076261	15
+59	7	message 4	2019-02-25 14:54:21.077055	15
+60	7	message 5	2019-02-25 14:54:21.077787	15
+61	7	message 6	2019-02-25 14:54:21.079264	15
+62	7	message 7	2019-02-25 14:54:21.08011	15
+63	7	message 8	2019-02-25 14:54:21.08073	15
+64	7	message 9	2019-02-25 14:54:21.0813	15
+65	8	message 0	2019-02-25 14:54:42.692708	16
+66	8	message 1	2019-02-25 14:54:42.695318	16
+67	8	message 2	2019-02-25 14:54:42.696067	16
+68	8	message 3	2019-02-25 14:54:42.696716	16
+69	8	message 4	2019-02-25 14:54:42.697328	16
+70	8	message 5	2019-02-25 14:54:42.697902	16
+71	8	message 6	2019-02-25 14:54:42.698536	16
+72	8	message 7	2019-02-25 14:54:42.699024	16
+73	8	message 8	2019-02-25 14:54:42.699446	16
+74	8	message 9	2019-02-25 14:54:42.700373	16
+75	4	message 0	2019-02-25 14:54:49.009055	17
+76	4	message 1	2019-02-25 14:54:49.012034	17
+77	4	message 2	2019-02-25 14:54:49.014648	17
+78	4	message 3	2019-02-25 14:54:49.015294	17
+79	4	message 4	2019-02-25 14:54:49.015914	17
+80	4	message 5	2019-02-25 14:54:49.016541	17
+81	4	message 6	2019-02-25 14:54:49.017173	17
+82	4	message 7	2019-02-25 14:54:49.017638	17
+83	4	message 8	2019-02-25 14:54:49.018184	17
+84	4	message 9	2019-02-25 14:54:49.018817	17
+\.
+
+
+--
+-- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: quack
+--
+
+COPY public.users (user_id, nick, name, avatar, vk_id) FROM stdin;
+2	lisa	Asya	\N	\N
+4	papa_kot	Yuriy	\N	\N
+5	new_nick	new_name	\N	vk_user_id
+7	Mama	Nata	\N	\N
+8	Brat	Ilya	\N	\N
+\.
+
+
+--
+-- Name: attachments_attach_id_seq; Type: SEQUENCE SET; Schema: public; Owner: quack
+--
+
+SELECT pg_catalog.setval('public.attachments_attach_id_seq', 1, false);
+
+
+--
+-- Name: chats_chat_id_seq; Type: SEQUENCE SET; Schema: public; Owner: quack
+--
+
+SELECT pg_catalog.setval('public.chats_chat_id_seq', 22, true);
+
+
+--
+-- Name: messages_message_id_seq; Type: SEQUENCE SET; Schema: public; Owner: quack
+--
+
+SELECT pg_catalog.setval('public.messages_message_id_seq', 84, true);
+
+
+--
+-- Name: users_user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: quack
+--
+
+SELECT pg_catalog.setval('public.users_user_id_seq', 8, true);
+
+
+--
+-- Name: attachments attachments_pkey; Type: CONSTRAINT; Schema: public; Owner: quack
+--
+
+ALTER TABLE ONLY public.attachments
+    ADD CONSTRAINT attachments_pkey PRIMARY KEY (attach_id);
+
+
+--
+-- Name: chats chats_pkey; Type: CONSTRAINT; Schema: public; Owner: quack
+--
+
+ALTER TABLE ONLY public.chats
+    ADD CONSTRAINT chats_pkey PRIMARY KEY (chat_id);
+
+
+--
+-- Name: messages messages_pkey; Type: CONSTRAINT; Schema: public; Owner: quack
+--
+
+ALTER TABLE ONLY public.messages
+    ADD CONSTRAINT messages_pkey PRIMARY KEY (message_id);
+
+
+--
+-- Name: users users_nick_key; Type: CONSTRAINT; Schema: public; Owner: quack
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_nick_key UNIQUE (nick);
+
+
+--
+-- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: quack
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_pkey PRIMARY KEY (user_id);
+
+
+--
+-- Name: attachments attachments_chat_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: quack
+--
+
+ALTER TABLE ONLY public.attachments
+    ADD CONSTRAINT attachments_chat_id_fkey FOREIGN KEY (chat_id) REFERENCES public.chats(chat_id);
+
+
+--
+-- Name: attachments attachments_message_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: quack
+--
+
+ALTER TABLE ONLY public.attachments
+    ADD CONSTRAINT attachments_message_id_fkey FOREIGN KEY (message_id) REFERENCES public.messages(message_id);
+
+
+--
+-- Name: attachments attachments_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: quack
+--
+
+ALTER TABLE ONLY public.attachments
+    ADD CONSTRAINT attachments_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id);
+
+
+--
+-- Name: members members_chat_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: quack
+--
+
+ALTER TABLE ONLY public.members
+    ADD CONSTRAINT members_chat_id_fkey FOREIGN KEY (chat_id) REFERENCES public.chats(chat_id);
+
+
+--
+-- Name: members members_last_read_message_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: quack
+--
+
+ALTER TABLE ONLY public.members
+    ADD CONSTRAINT members_last_read_message_id_fkey FOREIGN KEY (last_read_message_id) REFERENCES public.messages(message_id);
+
+
+--
+-- Name: members members_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: quack
+--
+
+ALTER TABLE ONLY public.members
+    ADD CONSTRAINT members_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id);
+
+
+--
+-- Name: messages messages_chat_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: quack
+--
+
+ALTER TABLE ONLY public.messages
+    ADD CONSTRAINT messages_chat_id_fkey FOREIGN KEY (chat_id) REFERENCES public.chats(chat_id);
+
+
+--
+-- Name: messages messages_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: quack
+--
+
+ALTER TABLE ONLY public.messages
+    ADD CONSTRAINT messages_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id);
+
+
+--
+-- Name: TABLE attachments; Type: ACL; Schema: public; Owner: quack
+--
+
+GRANT SELECT ON TABLE public.attachments TO nikita;
+
+
+--
+-- Name: TABLE chats; Type: ACL; Schema: public; Owner: quack
+--
+
+GRANT SELECT ON TABLE public.chats TO nikita;
+
+
+--
+-- Name: TABLE members; Type: ACL; Schema: public; Owner: quack
+--
+
+GRANT SELECT ON TABLE public.members TO nikita;
+
+
+--
+-- Name: TABLE messages; Type: ACL; Schema: public; Owner: quack
+--
+
+GRANT SELECT ON TABLE public.messages TO nikita;
+
+
+--
+-- Name: TABLE users; Type: ACL; Schema: public; Owner: quack
+--
+
+GRANT SELECT ON TABLE public.users TO nikita;
+
+
+--
+-- PostgreSQL database dump complete
+--
+
