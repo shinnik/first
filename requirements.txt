@@ -39,7 +39,7 @@ ipywidgets==7.2.1
 isort==4.3.4
 ItsDangerous==1.0.0
 jedi==0.12.0
-Jinja2==2.10
+Jinja2==2.11.3
 jsondiff==1.1.2
 jsonschema==2.6.0
 jupyter==1.0.0
